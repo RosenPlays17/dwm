@@ -1,5 +1,5 @@
 My build of DWM.
 
-includes the gaplessgrid, stacker, status2d and tilewide patches (maybe more but I don't think so).
-uses the 'CaskaydiaCove Nerd Font', which can be downloaded here: https://github.com/ryanoasis/nerd-fonts/releases/download/v2.3.3/CascadiaCode.zip
-has the windows-key set as the modkey and has keys set for adjusting volume and brightness (if you have those)
+Includes the gaplessgrid, stacker, status2d and tilewide patches (maybe more but I don't think so).
+Uses the 'CaskaydiaCove Nerd Font', which can be downloaded here: https://github.com/ryanoasis/nerd-fonts/releases/download/v2.3.3/CascadiaCode.zip
+Has the windows-key set as the modkey and has keys set for adjusting volume and brightness (if you have those)
