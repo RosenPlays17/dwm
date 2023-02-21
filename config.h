@@ -66,7 +66,7 @@ static const Layout layouts[] = {
 #define SHCMD(cmd) { .v = (const char*[]){ "/bin/sh", "-c", cmd, NULL } }
 
 /* commands */
-static const char *dmenucmd[] = { "dmenu_run", "-fn", dmenufont, "-nb", col_gray1, "-nf", col_gray3, "-sb", col_cyan, "-sf", col_gray4, NULL };
+static const char *dmenucmd[] = { "dmenu_run", "-y", "17", "-z", "230", "-l", "18", "-bw", "2", "-fn", dmenufont, "-nb", col_gray1, "-nf", col_gray3, "-sb", col_cyan, "-sf", col_gray4, NULL };
 static const char *termcmd[] = { "urxvt", NULL };
 static const char *slockcmd[] = { "slock" };
 
@@ -84,8 +84,8 @@ static const Key keys[] = {
 	{ MODKEY,                       XK_b,      togglebar,      {0} },
 	STACKKEYS(MODKEY,                          focus)
 	STACKKEYS(MODKEY|ShiftMask,                push)
-	{ MODKEY,                       XK_Left,   incnmaster,     {.i = +1 } },
-	{ MODKEY,                       XK_Right,  incnmaster,     {.i = -1 } },
+/*	{ MODKEY,                       XK_Left,   incnmaster,     {.i = +1 } }, */
+/*	{ MODKEY,                       XK_Right,  incnmaster,     {.i = -1 } }, */
 	{ MODKEY,                       XK_minus,  setmfact,       {.f = -0.05} },
 	{ MODKEY,                       XK_plus,   setmfact,       {.f = +0.05} },
 	{ MODKEY,                       XK_Return, zoom,           {0} },
