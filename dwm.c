@@ -39,6 +39,7 @@
 #ifdef XINERAMA
 #include <X11/extensions/Xinerama.h>
 #endif /* XINERAMA */
+#include <X11/extensions/shape.h>
 #include <X11/Xft/Xft.h>
 
 #include "drw.h"
@@ -208,6 +209,7 @@ static void sendmon(Client *c, Monitor *m);
 static void setclientstate(Client *c, long state);
 static void setfocus(Client *c);
 static void setfullscreen(Client *c, int fullscreen);
+static void fullscreen(const Arg *arg);
 static void setlayout(const Arg *arg);
 static void setmfact(const Arg *arg);
 static void setup(void);
@@ -244,6 +246,7 @@ static int xerrordummy(Display *dpy, XErrorEvent *ee);
 static int xerrorstart(Display *dpy, XErrorEvent *ee);
 static void zoom(const Arg *arg);
 static void tilewide(Monitor *m);
+static void roundcorners(Client *c);
 
 /* variables */
 static const char broken[] = "broken";
@@ -251,6 +254,7 @@ static char stext[1024];
 static int screen;
 static int sw, sh;           /* X display screen geometry width, height */
 static int bh;               /* bar height */
+static int enablefullscreen = 0;
 static int lrpad;            /* sum of left and right padding for text */
 static int (*xerrorxlib)(Display *, XErrorEvent *);
 static unsigned int numlockmask = 0;
@@ -1398,6 +1402,7 @@ resizeclient(Client *c, int x, int y, int w, int h)
 	wc.border_width = c->bw;
 	XConfigureWindow(dpy, c->win, CWX|CWY|CWWidth|CWHeight|CWBorderWidth, &wc);
 	configure(c);
+	roundcorners(c);
 	XSync(dpy, False);
 }
 
@@ -1464,6 +1469,9 @@ restack(Monitor *m)
 	Client *c;
 	XEvent ev;
 	XWindowChanges wc;
+
+	for (c = m->stack; c; c = c->snext)
+		roundcorners(c);
 
 	drawbar(m);
 	if (!m->sel)
@@ -1609,6 +1617,21 @@ setfullscreen(Client *c, int fullscreen)
 		resizeclient(c, c->x, c->y, c->w, c->h);
 		arrange(c->mon);
 	}
+}
+
+Layout *last_layout;
+void
+fullscreen(const Arg *arg)
+{
+	if (selmon->showbar) {
+		for(last_layout = (Layout *)layouts; last_layout != selmon->lt[selmon->sellt]; last_layout++);
+		setlayout(&((Arg) { .v = &layouts[2] }));
+        enablefullscreen = 1;
+	} else {
+		setlayout(&((Arg) { .v = last_layout }));
+        enablefullscreen = 0;
+	}
+	togglebar(arg);
 }
 
 void
@@ -2264,6 +2287,54 @@ zoom(const Arg *arg)
 	if (c == nexttiled(selmon->clients) && !(c = nexttiled(c->next)))
 		return;
 	pop(c);
+}
+
+void
+roundcorners(Client *c)
+{
+	Window w = c->win;
+	XWindowAttributes wa;
+	XGetWindowAttributes(dpy, w, &wa);
+
+	// If this returns null, the window is invalid.
+	if(!XGetWindowAttributes(dpy, w, &wa))
+		return;
+
+	int width = borderpx * 2 + wa.width;
+	int height = borderpx * 2 + wa.height;
+	/* int width = win_attr.border_width * 2 + win_attr.width; */
+	/* int height = win_attr.border_width * 2 + win_attr.height; */
+	int rad = cornerrad * (1-enablefullscreen); //config_theme_cornerradius;
+	int dia = 2 * rad;
+
+	// do not try to round if the window would be smaller than the corners
+	if(width < dia || height < dia)
+		return;
+
+	Pixmap mask = XCreatePixmap(dpy, w, width, height, 1);
+	// if this returns null, the mask is not drawable
+	if(!mask)
+		return;
+
+	XGCValues xgcv;
+	GC shape_gc = XCreateGC(dpy, mask, 0, &xgcv);
+	if(!shape_gc) {
+		XFreePixmap(dpy, mask);
+		return;
+	}
+
+	XSetForeground(dpy, shape_gc, 0);
+	XFillRectangle(dpy, mask, shape_gc, 0, 0, width, height);
+	XSetForeground(dpy, shape_gc, 1);
+	XFillArc(dpy, mask, shape_gc, 0, 0, dia, dia, 0, 23040);
+	XFillArc(dpy, mask, shape_gc, width-dia-1, 0, dia, dia, 0, 23040);
+	XFillArc(dpy, mask, shape_gc, 0, height-dia-1, dia, dia, 0, 23040);
+	XFillArc(dpy, mask, shape_gc, width-dia-1, height-dia-1, dia, dia, 0, 23040);
+	XFillRectangle(dpy, mask, shape_gc, rad, 0, width-dia, height);
+	XFillRectangle(dpy, mask, shape_gc, 0, rad, width, height-dia);
+	XShapeCombineMask(dpy, w, ShapeBounding, 0-wa.border_width, 0-wa.border_width, mask, ShapeSet);
+	XFreePixmap(dpy, mask);
+	XFreeGC(dpy, shape_gc);
 }
 
 int

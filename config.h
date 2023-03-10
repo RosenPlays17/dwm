@@ -4,9 +4,10 @@
 #include "gaplessgrid.c"
 
 /* appearance */
-static const unsigned int borderpx  = 2;        /* border pixel of windows */
+static const unsigned int borderpx  = 0;        /* border pixel of windows */
 static const unsigned int gappx		= 8;			/* gaps betwees windows */
-static const unsigned int snap      = 20;       /* snap pixel */
+static const unsigned int cornerrad	= 8;			/* corner radius */
+static const unsigned int snap      = 0;       /* snap pixel */
 static const int showbar            = 1;        /* 0 means no bar */
 static const int topbar             = 1;        /* 0 means bottom bar */
 static const char *fonts[]          = { "JetBrains Mono Nerd Font:size=9:antialias=true:bold" };
@@ -15,7 +16,7 @@ static const char col_gray1[]       = "#000000";
 static const char col_gray2[]       = "#444444";
 static const char col_gray3[]       = "#bbbbbb";
 static const char col_gray4[]       = "#eeeeee";
-static const char col_cyan[]        = "#5a24ff";
+static const char col_cyan[]        = "#1e1e24"; /* 5a24ff */
 static const char *colors[][3]      = {
 	/*               fg         bg         border   */
 	[SchemeNorm] = { col_gray3, col_gray1, col_gray2 },
@@ -95,6 +96,7 @@ static const Key keys[] = {
 	{ MODKEY,							XK_f,			setlayout,      {.v = &layouts[2]} },
 	{ MODKEY,                     XK_g,			setlayout,      {.v = &layouts[1]} },
 	{ MODKEY|ShiftMask,				XK_t,		   setlayout,		 {.v = &layouts[4]} },
+	{ MODKEY|ShiftMask,				XK_f,			fullscreen,		 {0} },
 	{ MODKEY,                     XK_space,	setlayout,      {0} },
 	{ MODKEY|ShiftMask,           XK_space,	togglefloating, {0} },
 	{ MODKEY,                     XK_0,			view,           {.ui = ~0 } },
